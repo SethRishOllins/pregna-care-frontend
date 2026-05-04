@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Bot, User, Sparkles } from 'lucide-react';
 
+// --- FIXED: Using dynamic URL for the Gemini AI engine ---
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 const Chatbot = () => {
   const [messages, setMessages] = useState([
     { id: 1, type: 'bot', text: 'Hello! I am your PregnaCare AI assistant. How can I help you today? You can ask me about your diet, symptoms, or interpret your latest report.' }
@@ -15,11 +18,9 @@ const Chatbot = () => {
 
   useEffect(scrollToBottom, [messages]);
 
-  // Gemini 2.5 ka istemaal
   const handleSend = async () => {
     if (!input.trim()) return;
 
-    // 1. Saving the input and adding the user message to the AI
     const currentInput = input;
     const userMsg = { id: Date.now(), type: 'user', text: currentInput };
     
@@ -27,9 +28,9 @@ const Chatbot = () => {
     setInput('');
     setIsTyping(true);
 
-    // 2. Calling the node js backend
     try {
-      const response = await fetch('http://localhost:5000/api/chat', {
+      // --- FIXED: Using API_BASE_URL instead of localhost ---
+      const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: currentInput })
@@ -37,7 +38,6 @@ const Chatbot = () => {
       
       const data = await response.json();
 
-    // AI response 
       const botMsg = { id: Date.now() + 1, type: 'bot', text: data.reply };
       setMessages(prev => [...prev, botMsg]);
       
@@ -46,7 +46,7 @@ const Chatbot = () => {
       const errorMsg = { 
         id: Date.now() + 1, 
         type: 'bot', 
-        text: "Sorry, I lost connection to the server. Please ensure your backend is running." 
+        text: "Sorry, I lost connection to the server. Please ensure your backend is running on Render." 
       };
       setMessages(prev => [...prev, errorMsg]);
     } finally {
