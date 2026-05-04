@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Image, Calendar, Download, Eye, Loader2 } from 'lucide-react';
 
+// --- FIXED: Use Environment Variable ---
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 const Reports = () => {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -8,7 +11,8 @@ const Reports = () => {
   useEffect(() => {
     const fetchRecords = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/records');
+        // --- FIXED: Use dynamic URL ---
+        const response = await fetch(`${API_BASE_URL}/api/records`);
         const data = await response.json();
         setRecords(data);
         setLoading(false);
@@ -61,9 +65,9 @@ const Reports = () => {
             </div>
 
             <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-              {/* --- FIXED: View Button (Opens raw image) --- */}
+              {/* --- FIXED: View Button --- */}
               <a 
-                href={record.filePath && record.filePath !== 'N/A' ? `http://localhost:5000/${record.filePath.replace(/\\/g, '/')}` : '#'}
+                href={record.filePath && record.filePath !== 'N/A' ? `${API_BASE_URL}/${record.filePath.replace(/\\/g, '/')}` : '#'}
                 target="_blank"
                 rel="noreferrer"
                 className={`flex-1 flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100 text-slate-700 py-2 rounded-lg text-sm font-semibold transition-colors ${
@@ -73,9 +77,9 @@ const Reports = () => {
                 <Eye className="w-4 h-4" /> View
               </a>
 
-              {/* --- FIXED: Download Button (Generates PDF) --- */}
+              {/* --- FIXED: Download Button --- */}
               <a 
-                href={`http://localhost:5000/api/reports/${record._id}/download`}
+                href={`${API_BASE_URL}/api/reports/${record._id}/download`}
                 className="flex-1 flex items-center justify-center gap-2 bg-medical-50 hover:bg-medical-100 text-medical-700 py-2 rounded-lg text-sm font-semibold transition-colors"
               >
                 <Download className="w-4 h-4" /> Download
