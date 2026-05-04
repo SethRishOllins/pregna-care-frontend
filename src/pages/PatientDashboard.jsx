@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, FileText, Calendar, AlertCircle, CheckCircle2, Clock, ShieldCheck } from 'lucide-react';
 
+// --- FIXED: This dynamically picks Render in production and localhost in development ---
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 const PatientDashboard = () => {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
-  // --- NEW: State to track which report is currently clicked open ---
   const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
     const fetchRecords = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/records');
+        // --- FIXED: Using API_BASE_URL instead of hardcoded localhost ---
+        const response = await fetch(`${API_BASE_URL}/api/records`);
         const data = await response.json();
         setRecords(data);
         setLoading(false);
@@ -92,7 +95,6 @@ const PatientDashboard = () => {
           <tbody className="divide-y divide-slate-100">
             {records.map((record) => (
               <React.Fragment key={record._id}>
-                {/* Main Table Row */}
                 <tr className={`hover:bg-slate-50/50 transition-colors ${expandedId === record._id ? 'bg-slate-50' : ''}`}>
                   <td className="px-8 py-5">
                     <span className={`px-3 py-1 rounded-md text-xs font-bold uppercase ${
@@ -107,7 +109,6 @@ const PatientDashboard = () => {
                   </td>
                   <td className="px-8 py-5">{getRiskBadge(record.riskScore)}</td>
                   <td className="px-8 py-5">
-                    {/* FIXED: The View Details button now toggles the drop-down report */}
                     <button 
                       onClick={() => setExpandedId(expandedId === record._id ? null : record._id)}
                       className="text-medical-600 hover:text-medical-800 font-bold text-sm bg-medical-50 px-3 py-1.5 rounded-lg transition-colors"
@@ -117,7 +118,6 @@ const PatientDashboard = () => {
                   </td>
                 </tr>
 
-                {/* --- NEW: The Detailed Clinical Drop-Down --- */}
                 {expandedId === record._id && (
                   <tr className="bg-slate-50 border-b border-slate-200">
                     <td colSpan="5" className="px-8 py-6">
@@ -127,7 +127,6 @@ const PatientDashboard = () => {
                         </h4>
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          {/* U-Net Metrics */}
                           <div className="bg-indigo-50/40 p-4 rounded-xl border border-indigo-100/50">
                             <p className="text-[10px] text-indigo-600 font-black uppercase tracking-widest mb-1">U-Net Spatial Analysis</p>
                             <p className="text-sm text-slate-500 mb-1 font-medium">Fetal Head Circumference</p>
@@ -136,7 +135,6 @@ const PatientDashboard = () => {
                             </p>
                           </div>
 
-                          {/* Random Forest Metrics */}
                           <div className="bg-rose-50/40 p-4 rounded-xl border border-rose-100/50">
                             <p className="text-[10px] text-rose-600 font-black uppercase tracking-widest mb-1">RF Tabular Analysis</p>
                             <p className="text-sm text-slate-500 mb-1 font-medium">Maternal Complication Risk</p>
@@ -145,7 +143,6 @@ const PatientDashboard = () => {
                             </p>
                           </div>
 
-                          {/* Vitals Snapshot */}
                           <div className="bg-emerald-50/40 p-4 rounded-xl border border-emerald-100/50">
                             <p className="text-[10px] text-emerald-600 font-black uppercase tracking-widest mb-1">Patient Vitals</p>
                             <p className="text-sm text-slate-500 mb-1 font-medium">BP | Age | Blood Sugar</p>
@@ -157,11 +154,11 @@ const PatientDashboard = () => {
                           </div>
                         </div>
                         
-                        {/* Open Image Button */}
                         {record.filePath && record.filePath !== 'N/A' && (
                           <div className="mt-5 pt-4 border-t border-slate-100 flex justify-end">
                             <a 
-                              href={`http://localhost:5000/${record.filePath.replace(/\\/g, '/')}`} 
+                              {/* FIXED: Using API_BASE_URL for images too */}
+                              href={`${API_BASE_URL}/${record.filePath.replace(/\\/g, '/')}`} 
                               target="_blank" 
                               rel="noreferrer"
                               className="inline-flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors"
