@@ -1,6 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { Upload as UploadIcon, FileText, Image, CheckCircle, ShieldCheck, Loader2, AlertCircle, Activity } from 'lucide-react';
 
+// --- FIXED: This picks Render in production and localhost in development ---
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 const Upload = () => {
   const [activeTab, setActiveTab] = useState('ultrasound');
   const [dragActive, setDragActive] = useState(false);
@@ -8,7 +11,6 @@ const Upload = () => {
   const [uploadStatus, setUploadStatus] = useState('idle'); 
   const fileInputRef = useRef(null);
 
-  // State for manual data
   const [manualData, setManualData] = useState({
     Age: '', SystolicBP: '', DiastolicBP: '', BS: '', BodyTemp: '', HeartRate: ''
   });
@@ -17,28 +19,25 @@ const Upload = () => {
     setManualData({ ...manualData, [e.target.name]: e.target.value });
   };
 
-  
   const handleUploadSubmit = async () => {
     setUploadStatus('uploading');
     const formData = new FormData();
 
-    // 1. Attaching the file that was selected
     if (selectedFile) {
       formData.append('medicalFile', selectedFile);
     }
 
-    // 2. Attaching the manual data
     Object.keys(manualData).forEach(key => {
       if (manualData[key] !== '') {
         formData.append(key, manualData[key]);
       }
     });
 
-    // 3. Telling the backend for the fusion request
     formData.append('entryType', 'fusion');
 
     try {
-      const response = await fetch('http://localhost:5000/api/upload', {
+      // --- FIXED: Using API_BASE_URL instead of localhost ---
+      const response = await fetch(`${API_BASE_URL}/api/upload`, {
         method: 'POST',
         body: formData,
       });
@@ -49,11 +48,10 @@ const Upload = () => {
         setUploadStatus('error');
       }
     } catch (error) {
+      console.error("Upload error:", error);
       setUploadStatus('error');
     }
   };
-
-
 
   return (
     <div className="p-8 max-w-5xl mx-auto animate-in fade-in duration-500">
@@ -72,15 +70,14 @@ const Upload = () => {
       </div>
 
       {activeTab === 'ultrasound' ? (
-        // --- YOUR EXISTING ULTRASOUND DRAG AND DROP AREA GOES HERE ---
         <div className="border-2 border-dashed rounded-3xl p-16 text-center border-slate-300">
              <h3 className="text-xl font-bold text-slate-800">Drag & drop your scan images here</h3>
-             {/* Add back your file input and browse button here */}
              <input type="file" ref={fileInputRef} onChange={(e) => setSelectedFile(e.target.files[0])} className="hidden" />
-             <button onClick={() => fileInputRef.current.click()} className="mt-4 bg-slate-200 px-6 py-2 rounded-lg">Browse Files</button>
+             <button onClick={() => fileInputRef.current.click()} className="mt-4 bg-slate-200 px-6 py-2 rounded-lg">
+               {selectedFile ? selectedFile.name : 'Browse Files'}
+             </button>
         </div>
       ) : (
-        // --- NEW: MANUAL ENTRY FORM ---
         <div className="bg-white border border-slate-200 rounded-3xl p-10 shadow-sm">
           <h3 className="text-xl font-bold text-slate-800 mb-6">Patient Vitals</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -102,7 +99,6 @@ const Upload = () => {
         </div>
       )}
 
-      {/* Action Buttons */}
       <div className="mt-8 flex justify-center">
         <button 
           onClick={handleUploadSubmit}
@@ -113,8 +109,8 @@ const Upload = () => {
         </button>
       </div>
       
-      {/* Messages */}
       {uploadStatus === 'success' && <p className="text-center text-green-600 mt-4 font-bold">Analysis complete! Check dashboard.</p>}
+      {uploadStatus === 'error' && <p className="text-center text-rose-600 mt-4 font-bold">Error connecting to AI server. Please check Render logs.</p>}
     </div>
   );
 };
