@@ -12,7 +12,6 @@ const PatientDashboard = () => {
   useEffect(() => {
     const fetchRecords = async () => {
       try {
-        // --- FIXED: Using API_BASE_URL instead of hardcoded localhost ---
         const response = await fetch(`${API_BASE_URL}/api/records`);
         const data = await response.json();
         setRecords(data);
@@ -52,7 +51,6 @@ const PatientDashboard = () => {
         </div>
       </header>
 
-      {/* Dynamic Summary Widgets */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
           <div className="w-12 h-12 bg-medical-50 text-medical-600 rounded-full flex items-center justify-center"><FileText className="w-6 h-6" /></div>
@@ -77,7 +75,6 @@ const PatientDashboard = () => {
         </div>
       </div>
 
-      {/* AI Analysis Table */}
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
         <div className="p-6 border-b border-slate-100 bg-slate-50">
           <h2 className="text-lg font-bold text-slate-800">Recent AI Analyses</h2>
@@ -157,7 +154,6 @@ const PatientDashboard = () => {
                         {record.filePath && record.filePath !== 'N/A' && (
                           <div className="mt-5 pt-4 border-t border-slate-100 flex justify-end">
                             <a 
-                              {/* FIXED: Using API_BASE_URL for images too */}
                               href={`${API_BASE_URL}/${record.filePath.replace(/\\/g, '/')}`} 
                               target="_blank" 
                               rel="noreferrer"
