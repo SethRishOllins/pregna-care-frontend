@@ -1,12 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { Upload as UploadIcon, FileText, Image, CheckCircle, ShieldCheck, Loader2, AlertCircle, Activity } from 'lucide-react';
 
-// --- FIXED: This picks Render in production and localhost in development ---
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const Upload = () => {
   const [activeTab, setActiveTab] = useState('ultrasound');
-  const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState('idle'); 
   const fileInputRef = useRef(null);
@@ -36,8 +34,8 @@ const Upload = () => {
     formData.append('entryType', 'fusion');
 
     try {
-      // --- FIXED: Using API_BASE_URL instead of localhost ---
-      const response = await fetch(`${API_BASE_URL}/api/upload`, {
+      // --- FIXED: Removed /api prefix ---
+      const response = await fetch(`${API_BASE_URL}/upload`, {
         method: 'POST',
         body: formData,
       });
@@ -110,7 +108,7 @@ const Upload = () => {
       </div>
       
       {uploadStatus === 'success' && <p className="text-center text-green-600 mt-4 font-bold">Analysis complete! Check dashboard.</p>}
-      {uploadStatus === 'error' && <p className="text-center text-rose-600 mt-4 font-bold">Error connecting to AI server. Please check Render logs.</p>}
+      {uploadStatus === 'error' && <p className="text-center text-rose-600 mt-4 font-bold">Error connecting to server. Please ensure Render backend is awake.</p>}
     </div>
   );
 };
