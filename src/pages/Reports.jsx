@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Image, Calendar, Download, Eye, Loader2 } from 'lucide-react';
 
-// --- FIXED: Use Environment Variable ---
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const Reports = () => {
@@ -11,14 +10,21 @@ const Reports = () => {
   useEffect(() => {
     const fetchRecords = async () => {
       try {
-        // --- FIXED: Use dynamic URL ---
-        const response = await fetch(`${API_BASE_URL}/api/records`);
+        // --- FIXED: Removed /api prefix ---
+        const response = await fetch(`${API_BASE_URL}/records`);
         const data = await response.json();
-        setRecords(data);
+        
+        // --- FIXED: Safety check to prevent crash if backend returns an error object ---
+        if (Array.isArray(data)) {
+          setRecords(data);
+        } else {
+          setRecords([]);
+        }
         setLoading(false);
       } catch (error) {
         console.error("Error fetching records:", error);
         setLoading(false);
+        setRecords([]);
       }
     };
     fetchRecords();
@@ -65,7 +71,6 @@ const Reports = () => {
             </div>
 
             <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-              {/* --- FIXED: View Button --- */}
               <a 
                 href={record.filePath && record.filePath !== 'N/A' ? `${API_BASE_URL}/${record.filePath.replace(/\\/g, '/')}` : '#'}
                 target="_blank"
@@ -77,9 +82,8 @@ const Reports = () => {
                 <Eye className="w-4 h-4" /> View
               </a>
 
-              {/* --- FIXED: Download Button --- */}
               <a 
-                href={`${API_BASE_URL}/api/reports/${record._id}/download`}
+                href={`${API_BASE_URL}/reports/${record._id}/download`}
                 className="flex-1 flex items-center justify-center gap-2 bg-medical-50 hover:bg-medical-100 text-medical-700 py-2 rounded-lg text-sm font-semibold transition-colors"
               >
                 <Download className="w-4 h-4" /> Download
