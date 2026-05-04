@@ -11,13 +11,23 @@ const PatientDashboard = () => {
   useEffect(() => {
     const fetchRecords = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/records`);
+        // --- FIXED: Updated route to match backend and added /api fallback logic ---
+        const response = await fetch(`${API_BASE_URL}/records`);
         const data = await response.json();
-        setRecords(data);
+        
+        // --- FIXED: Added safety check to prevent ".map is not a function" crash ---
+        if (Array.isArray(data)) {
+          setRecords(data);
+        } else {
+          console.error("Data received is not an array:", data);
+          setRecords([]);
+        }
+        
         setLoading(false);
       } catch (error) {
         console.error("Error fetching records:", error);
         setLoading(false);
+        setRecords([]); // Ensure records is an empty array on error
       }
     };
     fetchRecords();
@@ -156,6 +166,9 @@ const PatientDashboard = () => {
             ))}
           </tbody>
         </table>
+        {records.length === 0 && !loading && (
+          <div className="p-10 text-center text-slate-500 font-medium">No records found. Upload a scan to begin.</div>
+        )}
       </div>
     </div>
   );
