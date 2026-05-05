@@ -21,32 +21,43 @@ const Upload = () => {
     setUploadStatus('uploading');
     const formData = new FormData();
 
+    // Key must match 'medicalFile' in backend handle_upload
     if (selectedFile) {
       formData.append('medicalFile', selectedFile);
     }
 
+    // Pass all manual data to the backend
     Object.keys(manualData).forEach(key => {
       if (manualData[key] !== '') {
         formData.append(key, manualData[key]);
       }
     });
 
-    formData.append('entryType', 'fusion');
+    // Key must match 'fileType' in backend handle_upload
+    formData.append('fileType', activeTab);
 
     try {
-      // --- FIXED: Removed /api prefix ---
-      const response = await fetch(`${API_BASE_URL}/upload`, {
+      // 🌟 FIXED: Added trailing slash to prevent CORS-breaking redirects
+      // 🌟 FIXED: Added mode: 'cors' for explicit cross-origin permission
+      const response = await fetch(`${API_BASE_URL}/upload/`, {
         method: 'POST',
+        mode: 'cors',
         body: formData,
+        // NOTE: We do NOT set headers manually for FormData. 
+        // The browser will automatically set the correct boundary.
       });
 
       if (response.ok) {
+        const data = await response.json();
+        console.log("Upload Success:", data);
         setUploadStatus('success');
       } else {
+        const errorText = await response.text();
+        console.error("Server Error:", errorText);
         setUploadStatus('error');
       }
     } catch (error) {
-      console.error("Upload error:", error);
+      console.error("Upload network/CORS error:", error);
       setUploadStatus('error');
     }
   };
@@ -108,7 +119,7 @@ const Upload = () => {
       </div>
       
       {uploadStatus === 'success' && <p className="text-center text-green-600 mt-4 font-bold">Analysis complete! Check dashboard.</p>}
-      {uploadStatus === 'error' && <p className="text-center text-rose-600 mt-4 font-bold">Error connecting to server. Please ensure Render backend is awake.</p>}
+      {uploadStatus === 'error' && <p className="text-center text-rose-600 mt-4 font-bold">Error connecting to server. Please check console for CORS details.</p>}
     </div>
   );
 };
