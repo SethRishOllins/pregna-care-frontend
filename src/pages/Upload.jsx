@@ -37,9 +37,8 @@ const Upload = () => {
     formData.append('fileType', activeTab);
 
     try {
-      // 🌟 FIXED: Added trailing slash to prevent CORS-breaking redirects
-      // 🌟 FIXED: Added mode: 'cors' for explicit cross-origin permission
-      const response = await fetch(`${API_BASE_URL}/upload/`, {
+      // 🌟 FIXED: Removed trailing slash so it perfectly matches Render's @app.post("/upload")
+      const response = await fetch(`${API_BASE_URL}/upload`, {
         method: 'POST',
         mode: 'cors',
         body: formData,
